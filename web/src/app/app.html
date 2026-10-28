@@ -1,0 +1,104 @@
+<main class="page">
+  <header>
+    <h1>Sentence Builder</h1>
+    <p class="sub">Pick a word type, choose a word, add it, then submit your sentence.</p>
+  </header>
+
+  @if (error()) {
+    <div class="banner error" role="alert">{{ error() }}</div>
+  }
+  @if (notice()) {
+    <div class="banner ok" role="status">{{ notice() }}</div>
+  }
+
+  <section class="card">
+    <h2>{{ editingId() === null ? 'New sentence' : 'Editing sentence #' + editingId() }}</h2>
+
+    <div class="pickers">
+      <label>
+        <span>Word type</span>
+        <select [ngModel]="selectedTypeId()" (ngModelChange)="onTypeChange($event)">
+          <option [ngValue]="null">Choose a type…</option>
+          @for (type of wordTypes(); track type.id) {
+            <option [ngValue]="type.id">{{ type.name }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Word</span>
+        <select
+          [ngModel]="selectedWordId()"
+          (ngModelChange)="selectedWordId.set($event)"
+          [disabled]="selectedTypeId() === null"
+        >
+          <option [ngValue]="null">Choose a word…</option>
+          @for (word of wordsForType(); track word.id) {
+            <option [ngValue]="word.id">{{ word.text }}</option>
+          }
+        </select>
+      </label>
+
+      <button type="button" class="primary" (click)="addWord()" [disabled]="selectedWordId() === null">
+        Add
+      </button>
+    </div>
+
+    <div class="sentence">
+      <h3>Your sentence</h3>
+      @if (builder().length === 0) {
+        <p class="empty">No words yet.</p>
+      } @else {
+        <p class="preview">{{ preview() }}</p>
+        <ul class="chips">
+          @for (word of builder(); track $index) {
+            <li class="chip">
+              <span class="chip-text">{{ word.text }}</span>
+              <small>{{ word.typeName }}</small>
+              <span class="chip-actions">
+                <button type="button" (click)="move($index, -1)" [disabled]="$first" aria-label="Move left">‹</button>
+                <button type="button" (click)="move($index, 1)" [disabled]="$last" aria-label="Move right">›</button>
+                <button type="button" (click)="removeWord($index)" aria-label="Remove word">×</button>
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <div class="actions">
+      <button type="button" class="primary" (click)="submit()" [disabled]="builder().length === 0 || busy()">
+        {{ editingId() === null ? 'Submit sentence' : 'Save changes' }}
+      </button>
+      @if (editingId() !== null) {
+        <button type="button" (click)="cancelEdit()">Cancel edit</button>
+      } @else if (builder().length > 0) {
+        <button type="button" (click)="cancelEdit()">Clear</button>
+      }
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Submitted sentences</h2>
+    @if (sentences().length === 0) {
+      <p class="empty">Nothing submitted yet.</p>
+    } @else {
+      <ul class="history">
+        @for (sentence of sentences(); track sentence.id) {
+          <li>
+            <div>
+              <p class="history-text">{{ sentence.text }}</p>
+              <small>
+                #{{ sentence.id }} · {{ sentence.createdAt | date: 'medium' }}
+                @if (sentence.updatedAt) {
+                  · edited {{ sentence.updatedAt | date: 'medium' }}
+                }
+              </small>
+            </div>
+            <button type="button" (click)="edit(sentence)">Edit</button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</main>

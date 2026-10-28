@@ -1,0 +1,33 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD:-Sentence_Builder_123}
+    volumes:
+      - sqldata:/var/opt/mssql
+
+  api:
+    build: ./api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=SentenceBuilder;User Id=sa;Password=${SA_PASSWORD:-Sentence_Builder_123};TrustServerCertificate=True"
+      Cors__AllowedOrigins__0: http://localhost:4200
+      Database__MigrateOnStartup: "true"
+    ports:
+      - "5080:8080"
+    depends_on:
+      - db
+    restart: on-failure
+
+  web:
+    build: ./web
+    environment:
+      API_BASE_URL: http://localhost:5080/api
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+
+volumes:
+  sqldata:
