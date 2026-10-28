@@ -3,6 +3,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       ACCEPT_EULA: "Y"
+      MSSQL_MEMORY_LIMIT_MB: 1024
       MSSQL_SA_PASSWORD: ${SA_PASSWORD:-Sentence_Builder_123}
     volumes:
       - sqldata:/var/opt/mssql

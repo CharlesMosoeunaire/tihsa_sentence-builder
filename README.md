@@ -54,3 +54,10 @@ Validation: a sentence with no words, or with unknown word ids, returns `400` wi
    - `Cors__AllowedOrigins__0` = the web app's URL
    - `Database__MigrateOnStartup` = `true`
 3. **Web**: Azure Static Web Apps (build output `dist/sentence-builder-web/browser`) or Container Apps using `web/Dockerfile` with `API_BASE_URL` set to the API's URL. For Static Web Apps, edit `config.json` before deploying.
+
+## Requirements and verification notes
+
+- **Tooling:** .NET 10 SDK, Node 20.19 or newer (Angular 20), Docker Desktop for the container route.
+- **Verified end to end locally:** API + Angular dev server against SQL Server in Docker. Loading word lists, building a sentence, submitting, editing, viewing history and persistence after a refresh all work.
+- **Container stack:** `docker compose up --build` built all three images and the app loaded at http://localhost:4200. It was not re-run after the final small changes because the test laptop has 8 GB of RAM. SQL Server is capped at 1 GB in `docker-compose.yml` (`MSSQL_MEMORY_LIMIT_MB`). On small machines give Docker at least 4 GB.
+- **Not included:** automated tests and a live Azure deployment. The Azure steps above are documented but untested.
